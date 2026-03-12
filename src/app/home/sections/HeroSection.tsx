@@ -19,8 +19,8 @@ const T = {
 };
 
 const stats = [
-  { val: "500+", label: "Products"  },
-  { val: "15+",  label: "Years"     },
+  { val: "200+", label: "Products"  },
+  { val: "10+",  label: "Years"     },
   { val: "GMP",  label: "Certified" },
   { val: "WHO",  label: "Compliant" },
 ];
@@ -287,7 +287,7 @@ export default function HeroSection() {
           }}>Nobil Laboratories · Surat, India</span>
         </motion.div>
 
-        {[["Noble","Science."],["Trusted","Care."]].map((row, ri) => (
+        {[["Nobil","Science."],["Trusted","Care."]].map((row, ri) => (
           <div key={ri} style={{ marginBottom: ri === 0 ? 4 : 24 }}>
             {row.map((word, wi) => (
               <motion.span key={word}
