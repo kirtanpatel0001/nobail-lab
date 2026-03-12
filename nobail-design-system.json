@@ -1,0 +1,261 @@
+{
+  "_comment": "Nobil Laboratories — Official Design System & Brand Tokens",
+  "_version": "1.0.0",
+  "_brand": "Nobil Laboratories",
+  "_logo": {
+    "icon": "public/LOGO/NOBAIL1.png",
+    "wordmark": "public/LOGO/NOBIL 02.png",
+    "usage": "Always use icon + wordmark together. Icon alone allowed at small sizes."
+  },
+
+  "colors": {
+    "primary": {
+      "value": "#2C4A5C",
+      "name": "Deep Ocean",
+      "usage": "Main brand color — headings, navbar, CTA buttons, active states"
+    },
+    "primaryHover": {
+      "value": "#3D6478",
+      "name": "Ocean Hover",
+      "usage": "Hover/focus state for primary elements"
+    },
+    "primaryLight": {
+      "value": "#EBF3F7",
+      "name": "Ocean Tint",
+      "usage": "Backgrounds for highlighted/active items, tag chips"
+    },
+    "accent": {
+      "value": "#5BA3C4",
+      "name": "Globe Blue",
+      "usage": "Secondary accent — icons, dots, highlights, hover indicators, links"
+    },
+    "accentLight": {
+      "value": "#D4EAF5",
+      "name": "Sky Tint",
+      "usage": "Light accent backgrounds, hover backgrounds on links"
+    },
+    "accentDeep": {
+      "value": "#3D7FA0",
+      "name": "Deep Sky",
+      "usage": "Darker accent for contrast on light backgrounds"
+    },
+    "background": {
+      "default": {
+        "value": "#FFFFFF",
+        "usage": "Main page background"
+      },
+      "subtle": {
+        "value": "#F4F8FA",
+        "name": "Fog",
+        "usage": "Section backgrounds, footer, cards, 404 page"
+      },
+      "card": {
+        "value": "#FFFFFF",
+        "usage": "Card/panel backgrounds"
+      },
+      "highlight": {
+        "value": "#EBF3F7",
+        "usage": "Highlighted row or selected item background"
+      }
+    },
+    "border": {
+      "default": {
+        "value": "#DDE6EA",
+        "usage": "Default borders — cards, dividers, inputs"
+      },
+      "focus": {
+        "value": "#5BA3C4",
+        "usage": "Input focus border"
+      },
+      "strong": {
+        "value": "#B8D0DA",
+        "usage": "Stronger borders when more definition needed"
+      }
+    },
+    "text": {
+      "primary": {
+        "value": "#1A2E38",
+        "name": "Ink",
+        "usage": "Headings, body text, high-emphasis labels"
+      },
+      "secondary": {
+        "value": "#2C4A5C",
+        "name": "Deep Ocean",
+        "usage": "Sub-headings, section titles"
+      },
+      "muted": {
+        "value": "#6B8A99",
+        "name": "Slate",
+        "usage": "Captions, placeholders, secondary labels, nav links at rest"
+      },
+      "subtle": {
+        "value": "#A8BEC8",
+        "name": "Mist",
+        "usage": "Footer meta text, timestamps, disabled states"
+      },
+      "onPrimary": {
+        "value": "#FFFFFF",
+        "usage": "Text on primary-colored backgrounds (buttons, badges)"
+      }
+    },
+    "status": {
+      "success": "#1E8A5E",
+      "warning": "#D4820A",
+      "error":   "#C0392B",
+      "info":    "#5BA3C4"
+    }
+  },
+
+  "typography": {
+    "fontFamilies": {
+      "display": "var(--font-geist-sans)",
+      "body":    "var(--font-geist-sans)",
+      "mono":    "var(--font-geist-mono)",
+      "note":    "The brand wordmark uses a high-contrast serif (as seen in logo). For web use Geist Sans."
+    },
+    "scale": {
+      "xs":  { "size": "12px", "lineHeight": "1.5",  "usage": "Labels, caps, badges" },
+      "sm":  { "size": "13.5px","lineHeight": "1.6",  "usage": "Sub-links, captions" },
+      "base":{ "size": "15px", "lineHeight": "1.7",  "usage": "Body text, nav links" },
+      "md":  { "size": "17px", "lineHeight": "1.7",  "usage": "Lead paragraphs" },
+      "lg":  { "size": "22px", "lineHeight": "1.4",  "usage": "Card headings" },
+      "xl":  { "size": "28px", "lineHeight": "1.25", "usage": "Section headings" },
+      "2xl": { "size": "40px", "lineHeight": "1.1",  "usage": "Page headings" },
+      "3xl": { "size": "64px", "lineHeight": "1.0",  "usage": "Hero headings" }
+    },
+    "weights": {
+      "regular": 400,
+      "medium":  500,
+      "semibold":600,
+      "bold":    700,
+      "extrabold":800
+    },
+    "tracking": {
+      "tight":  "-0.04em",
+      "normal": "0em",
+      "wide":   "0.06em",
+      "caps":   "0.12em"
+    }
+  },
+
+  "spacing": {
+    "xs":  "4px",
+    "sm":  "8px",
+    "md":  "16px",
+    "lg":  "24px",
+    "xl":  "40px",
+    "2xl": "64px",
+    "3xl": "96px",
+    "containerMaxWidth": "1340px",
+    "containerPadding":  "2rem"
+  },
+
+  "radii": {
+    "sm":   "6px",
+    "md":   "10px",
+    "lg":   "14px",
+    "xl":   "20px",
+    "pill": "100px",
+    "full": "50%"
+  },
+
+  "shadows": {
+    "sm":  "0 1px 4px rgba(44,74,92,0.08)",
+    "md":  "0 4px 16px rgba(44,74,92,0.10)",
+    "lg":  "0 8px 32px rgba(44,74,92,0.12)",
+    "xl":  "0 16px 56px rgba(44,74,92,0.14)",
+    "card":"0 2px 8px rgba(44,74,92,0.07)"
+  },
+
+  "components": {
+    "navbar": {
+      "height":     "70px",
+      "background": "#FFFFFF",
+      "borderColor":"#DDE6EA",
+      "linkColor":  "#6B8A99",
+      "linkHover":  "#2C4A5C",
+      "activeBg":   "rgba(44,74,92,0.07)",
+      "dropdownBg": "#FFFFFF",
+      "dropdownShadow":"0 8px 32px rgba(44,74,92,0.12)"
+    },
+    "footer": {
+      "background": "#F4F8FA",
+      "borderColor":"#DDE6EA",
+      "headingColor":"#2C4A5C",
+      "linkColor":  "#6B8A99",
+      "linkHover":  "#2C4A5C",
+      "metaColor":  "#A8BEC8"
+    },
+    "button": {
+      "primary": {
+        "bg":       "#2C4A5C",
+        "bgHover":  "#3D6478",
+        "text":     "#FFFFFF",
+        "radius":   "8px",
+        "padding":  "10px 24px"
+      },
+      "ghost": {
+        "bg":          "transparent",
+        "border":      "#DDE6EA",
+        "borderHover": "#5BA3C4",
+        "text":        "#6B8A99",
+        "textHover":   "#2C4A5C"
+      },
+      "accent": {
+        "bg":      "#5BA3C4",
+        "bgHover": "#3D7FA0",
+        "text":    "#FFFFFF"
+      }
+    },
+    "card": {
+      "background":    "#FFFFFF",
+      "border":        "#DDE6EA",
+      "borderHover":   "#5BA3C4",
+      "radius":        "14px",
+      "padding":       "2rem",
+      "shadowHover":   "0 8px 32px rgba(44,74,92,0.09)"
+    },
+    "input": {
+      "background":    "#F4F8FA",
+      "border":        "#DDE6EA",
+      "borderFocus":   "#5BA3C4",
+      "text":          "#1A2E38",
+      "placeholder":   "#A8BEC8",
+      "radius":        "10px"
+    },
+    "badge": {
+      "defaultBg":   "rgba(91,163,196,0.12)",
+      "defaultBorder":"rgba(91,163,196,0.28)",
+      "defaultText": "#3D6478",
+      "primaryBg":   "rgba(44,74,92,0.08)",
+      "primaryText": "#2C4A5C"
+    },
+    "loading": {
+      "spinnerPrimary":  "#2C4A5C",
+      "spinnerSecondary":"#5BA3C4",
+      "spinnerTrack":    "#DDE6EA",
+      "background":      "#F4F8FA"
+    },
+    "notFound": {
+      "background":     "#F4F8FA",
+      "watermarkColor": "rgba(91,163,196,0.07)",
+      "dotGridColor":   "#B8D0DA"
+    }
+  },
+
+  "gradients": {
+    "heroBg":     "radial-gradient(ellipse at 50% 0%, rgba(91,163,196,0.10) 0%, transparent 65%)",
+    "ctaSection": "linear-gradient(135deg, rgba(44,74,92,0.05) 0%, rgba(91,163,196,0.05) 100%)",
+    "accentLine": "linear-gradient(90deg, #2C4A5C, #5BA3C4)"
+  },
+
+  "motion": {
+    "fast":   "0.15s ease",
+    "normal": "0.22s ease",
+    "slow":   "0.35s cubic-bezier(0.22, 1, 0.36, 1)",
+    "drawer": "0.28s cubic-bezier(0.22, 1, 0.36, 1)",
+    "hover":  "transform 0.15s ease, box-shadow 0.2s ease, border-color 0.18s ease"
+  }
+
+  
+}

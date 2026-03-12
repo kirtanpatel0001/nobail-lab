@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
+const nextConfig = {
+  compress: true,
+  images: {
+    formats: ['image/avif', 'image/webp'], // modern formats
+  },
+  experimental: {
+    optimizeCss: true,
+  },
+}
