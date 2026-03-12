@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   MapPin, Mail, Phone, Clock,
@@ -51,7 +51,7 @@ const FLOATING = [
   { Icon: Microscope,   top:"65%", right:"5%",  size:90, op:0.27, delay:"0.8s", dur:"7.5s" },
 ];
 
-export default function ContactPage() {
+function ContactForm() {
   const searchParams = useSearchParams();
 
   // Read URL query params from product page
@@ -83,7 +83,7 @@ export default function ContactPage() {
         message: f.message || autoMessage,
       }));
     }
-  }, [qProduct, qSubject]);
+  }, [qProduct, qSubject, autoMessage]);
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
@@ -478,5 +478,17 @@ export default function ContactPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function ContactPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F4F8FA" }}>
+        Loading Contact Form...
+      </div>
+    }>
+      <ContactForm />
+    </Suspense>
   );
 }

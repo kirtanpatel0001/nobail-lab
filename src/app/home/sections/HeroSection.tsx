@@ -15,7 +15,7 @@ const T = {
   textMuted:    "#6B8A99",
   textSubtle:   "#A8BEC8",
   border:       "#DDE6EA",
-  easing:       [0.22, 1, 0.36, 1],
+  easing:       [0.22, 1, 0.36, 1] as const,
 };
 
 const stats = [
@@ -25,15 +25,29 @@ const stats = [
   { val: "WHO",  label: "Compliant" },
 ];
 
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+  alpha: number;
+  color: string;
+}
+
 function ParticleCanvas() {
-  const canvasRef = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouse = useRef({ x: -9999, y: -9999 });
-  const particles = useRef([]);
-  const animRef = useRef(null);
+  const particles = useRef<Particle[]>([]);
+  const animRef = useRef<number | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
+    
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
     let time = 0;
 
     const resize = () => {
@@ -54,7 +68,7 @@ function ParticleCanvas() {
       color: Math.random() > 0.5 ? "#5BA3C4" : "#2C4A5C",
     }));
 
-    const onMouseMove = (e) => {
+    const onMouseMove = (e: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       mouse.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
@@ -185,7 +199,9 @@ function ParticleCanvas() {
     draw();
 
     return () => {
-      cancelAnimationFrame(animRef.current);
+      if (animRef.current !== null) {
+        cancelAnimationFrame(animRef.current);
+      }
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseleave", onMouseLeave);

@@ -1,6 +1,10 @@
 "use client";
+
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase/server";
+import { Product } from "@/types/product";
+import GlobalImage from "@/components/GlobalImage";
 
 const C = {
   primary:  "#2C4A5C",
@@ -10,125 +14,91 @@ const C = {
   border:   "#E2E8EC",
   pageBg:   "#FFFFFF",
   dash:     "#B89A6A",
+  rx:       "#DC2626", // Added rx color to fix the TS error
 };
-
-const PRODUCTS = [
-  {
-    id:       "p1",
-    tag:      "Ophthalmic",
-    name:     "Lubricating Eye Drops",
-    form:     "0.5% Carboxymethylcellulose",
-    pack:     "10 ml Dropper Bottle",
-    desc:     "Precision-formulated sterile solution for long-lasting relief from dry eye syndrome. GDP-certified, preservative-free variant available.",
-    badge:    null,
-    img:      "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=900&q=90",
-    href:     "/products/lubricating-eye-drops",
-  },
-  {
-    id:       "p2",
-    tag:      "Dermatologic",
-    name:     "Antifungal Cream",
-    form:     "Clotrimazole 1% w/w",
-    pack:     "15 g Tube",
-    desc:     "Broad-spectrum topical antifungal clinically proven against dermatophytes. Smooth, non-greasy base for sustained patient compliance.",
-    badge:    "Bestseller",
-    img:      "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=900&q=90",
-    href:     "/products/antifungal-cream",
-  },
-  {
-    id:       "p3",
-    tag:      "Dermatologic",
-    name:     "Barrier Repair Gel",
-    form:     "Panthenol + Allantoin",
-    pack:     "30 g Tube",
-    desc:     "Advanced skin-barrier recovery formulation with dual-action moisturisation. Suitable for post-procedure and chronic dry-skin management.",
-    badge:    "New",
-    img:      "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=900&q=90",
-    href:     "/products/barrier-repair-gel",
-  },
-  {
-    id:       "p4",
-    tag:      "Therapeutics",
-    name:     "Multivitamin Capsules",
-    form:     "Vitamins A, C, D, E + B-complex",
-    pack:     "Strip of 10 Capsules",
-    desc:     "Comprehensive micronutrient supplement covering daily therapeutic requirements. Manufactured under WHO-GMP conditions with validated bioavailability.",
-    badge:    null,
-    img:      "https://images.unsplash.com/photo-1550572017-edd951b55104?w=900&q=90",
-    href:     "/products/multivitamin-capsules",
-  },
-];
 
 /* Colour tints per category for the tag pill */
 const TAG_PALETTE = {
-  "Ophthalmic":   { bg: "rgba(91,163,196,0.18)",  text: "#2A7A9B" },
-  "Dermatologic": { bg: "rgba(30,138,94,0.15)",   text: "#167A52" },
-  "Therapeutics": { bg: "rgba(184,154,106,0.18)", text: "#8A6830" },
+  "Ophthalmic":           { bg: "rgba(91,163,196,0.18)",  text: "#2A7A9B" },
+  "Dermatology":          { bg: "rgba(30,138,94,0.15)",   text: "#167A52" },
+  "General Therapeutics": { bg: "rgba(184,154,106,0.18)", text: "#8A6830" },
 };
 
+// Helper: Checks if a product is less than 30 days old
+function isNew(created_at?: string | null): boolean {
+  if (!created_at) return false;
+  return Date.now() - new Date(created_at).getTime() < 30 * 24 * 60 * 60 * 1000;
+}
+
+// Helper: Gets the correct full URL for the image
+function getImgUrl(val: string | null | undefined) {
+  if (!val) return "";
+  if (val.startsWith("http")) return val;
+  return `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload/${val}`;
+}
+
 // ─── Card ─────────────────────────────────────────────────────────────────────
-function ProductCard({ p, index }) {
+function ProductCard({ p, index }: { p: Product; index: number }) {
   const [hovered, setHovered] = useState(false);
-  const tp = TAG_PALETTE[p.tag] || { bg: "rgba(91,163,196,0.18)", text: "#2A7A9B" };
+  
+  // Safe category fallback
+  const cat = p.category || "General Therapeutics";
+  const tp = TAG_PALETTE[cat as keyof typeof TAG_PALETTE] || TAG_PALETTE["General Therapeutics"];
+
+  // Determine badge
+  const badge = isNew(p.created_at) ? "New" : p.prescription_required ? "Rx Only" : null;
 
   return (
     <Link
-      href={p.href}
+      href={`/products/${p.id}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         display:        "flex",
         flexDirection:  "column",
         textDecoration: "none",
-        borderRadius:   "12px",
+        borderRadius:   "16px",
         overflow:       "hidden",
         border:         `1px solid ${hovered ? "rgba(91,163,196,0.45)" : C.border}`,
         boxShadow:      hovered
-          ? "0 24px 64px rgba(44,74,92,0.16), 0 4px 16px rgba(44,74,92,0.08)"
-          : "0 2px 12px rgba(44,74,92,0.06)",
+          ? "0 24px 64px rgba(44,74,92,0.12), 0 4px 16px rgba(44,74,92,0.06)"
+          : "0 2px 12px rgba(44,74,92,0.04)",
         transform:      hovered ? "translateY(-6px)" : "translateY(0)",
         transition:     "transform 0.32s cubic-bezier(0.22,1,0.36,1), box-shadow 0.32s ease, border-color 0.25s ease",
         animation:      `fadeUp 0.55s ease both`,
         animationDelay: `${index * 0.09}s`,
         background:     "#fff",
+        height:         "100%", // Ensure all cards stretch to same height in grid
       }}
     >
-
-      {/* ── FULL-BLEED IMAGE ─────────────────────────────
-          No padding, no container bg peeking — image fills edge-to-edge.
-          We use a dark gradient overlay at the bottom so the tag pill
-          always reads cleanly on top of any photo colour.           */}
+      {/* ── IMAGE AREA ── */}
       <div style={{
         position: "relative",
-        height:   "300px",          /* fixed height so all 4 align */
+        height:   "260px",
+        background: "#F8FAFC",
+        borderBottom: `1px solid ${C.border}`,
+        padding: "24px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
         overflow: "hidden",
       }}>
-        {/* The image itself — cover fills every pixel */}
-        <img
-          src={p.img}
-          alt={p.name}
-          style={{
-            display:    "block",
-            width:      "100%",
-            height:     "100%",
-            objectFit:  "cover",    /* full-bleed, no empty space */
-            objectPosition: "center",
-            transform:  hovered ? "scale(1.06)" : "scale(1.0)",
-            transition: "transform 0.6s cubic-bezier(0.22,1,0.36,1)",
-          }}
-        />
+        {p.image_id ? (
+          <div style={{ 
+            width: "100%", height: "100%", 
+            transform: hovered ? "scale(1.06)" : "scale(1.0)", 
+            transition: "transform 0.6s cubic-bezier(0.22,1,0.36,1)" 
+          }}>
+            <GlobalImage src={getImgUrl(p.image_id)} alt={p.name} mode="contain" aspectRatio="1/1" />
+          </div>
+        ) : (
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.5" opacity={0.3}>
+            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+          </svg>
+        )}
 
-        {/* Gradient vignette — bottom 50% fades to near-black so overlaid
-            text is always legible regardless of photo brightness */}
-        <div style={{
-          position:   "absolute",
-          inset:      0,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0) 35%, rgba(10,22,30,0.72) 100%)",
-          pointerEvents: "none",
-        }}/>
-
-        {/* Category tag — top-left, pill style */}
+        {/* Category tag */}
         <div style={{
           position:      "absolute",
           top:           "14px",
@@ -140,76 +110,65 @@ function ProductCard({ p, index }) {
           border:        `1px solid ${tp.text}30`,
           borderRadius:  "99px",
           fontSize:      "10px",
-          fontWeight:    700,
+          fontWeight:    800,
           letterSpacing: "0.12em",
           textTransform: "uppercase",
           color:         tp.text,
           fontFamily:    "'DM Sans', sans-serif",
+          zIndex: 2,
         }}>
-          {p.tag}
+          {cat}
         </div>
 
-        {/* Badge — top-right */}
-        {p.badge && (
+        {/* Badge */}
+        {badge && (
           <div style={{
             position:      "absolute",
             top:           "14px",
             right:         "14px",
             padding:       "4px 11px",
-            background:    p.badge === "New" ? "#1E8A5E" : C.primary,
-            borderRadius:  "3px",
+            background:    badge === "New" ? "#1E8A5E" : C.rx,
+            borderRadius:  "4px",
             fontSize:      "9px",
-            fontWeight:    700,
+            fontWeight:    800,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
             color:         "#fff",
             fontFamily:    "'DM Sans', sans-serif",
+            zIndex: 2,
           }}>
-            {p.badge}
+            {badge}
           </div>
         )}
-
-        {/* Product name lives IN the image at bottom-left on the dark gradient
-            so it reads as a cinematic title. On hover the full info panel
-            slides up from the bottom of the CARD (below), not from here.  */}
-        <div style={{
-          position: "absolute",
-          bottom:   "16px",
-          left:     "18px",
-          right:    "18px",
-        }}>
-          <h3 style={{
-            fontFamily:    "'DM Serif Display', serif",
-            fontSize:      "1.2rem",
-            fontWeight:    400,
-            color:         "#fff",
-            lineHeight:    1.25,
-            margin:        0,
-            textShadow:    "0 2px 8px rgba(0,0,0,0.4)",
-            /* Slide title up slightly on hover for polish */
-            transform:     hovered ? "translateY(-3px)" : "translateY(0)",
-            transition:    "transform 0.35s ease",
-          }}>
-            {p.name}
-          </h3>
-        </div>
       </div>
 
-      {/* ── DETAILS PANEL ────────────────────────────────
-          Always visible (not hidden-on-hover) so the card
-          works on touch devices too. Clean white background
-          with formulation, pack, and a short description.  */}
+      {/* ── DETAILS PANEL ── */}
       <div style={{
-        padding:    "20px 20px 22px",
+        padding:    "20px",
         display:    "flex",
         flexDirection: "column",
-        gap:        "10px",
+        gap:        "12px",
         flex:       1,
         background: "#fff",
       }}>
+        
+        <h3 style={{
+          fontFamily:    "'DM Serif Display', serif",
+          fontSize:      "1.3rem",
+          fontWeight:    400,
+          color:         C.text,
+          lineHeight:    1.25,
+          margin:        0,
+          display:       "-webkit-box",
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: "vertical",
+          overflow:      "hidden",
+        }}>
+          {p.name}
+        </h3>
 
-        {/* Formulation + pack as two small labelled rows */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+        {/* Formulation + pack */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
             <span style={{
               fontFamily:    "'DM Sans', sans-serif",
@@ -219,17 +178,20 @@ function ProductCard({ p, index }) {
               textTransform: "uppercase",
               color:         C.muted,
               flexShrink:    0,
-              width:         "72px",
+              width:         "84px",
             }}>
               Formulation
             </span>
             <span style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize:   "12.5px",
+              fontSize:   "12px",
               fontWeight: 600,
               color:      C.text,
+              whiteSpace: "nowrap",
+              overflow:   "hidden",
+              textOverflow: "ellipsis"
             }}>
-              {p.form}
+              {p.composition || p.dosage_form || "—"}
             </span>
           </div>
 
@@ -242,17 +204,17 @@ function ProductCard({ p, index }) {
               textTransform: "uppercase",
               color:         C.muted,
               flexShrink:    0,
-              width:         "72px",
+              width:         "84px",
             }}>
               Pack Size
             </span>
             <span style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize:   "12.5px",
+              fontSize:   "12px",
               fontWeight: 600,
               color:      C.text,
             }}>
-              {p.pack}
+              {p.packaging || p.unit_measure ? `${p.packaging || ""} ${p.unit_measure ? `· ${p.unit_measure}` : ""}` : "—"}
             </span>
           </div>
         </div>
@@ -261,10 +223,10 @@ function ProductCard({ p, index }) {
         <div style={{
           height:     "1px",
           background: C.border,
-          margin:     "2px 0",
+          margin:     "4px 0",
         }}/>
 
-        {/* Description — 3 lines max */}
+        {/* Description */}
         <p style={{
           fontFamily:          "'DM Sans', sans-serif",
           fontSize:            "12.5px",
@@ -277,29 +239,29 @@ function ProductCard({ p, index }) {
           overflow:            "hidden",
           flex:                1,
         }}>
-          {p.desc}
+          {p.short_description || "High-efficacy formulation engineered for superior clinical outcomes."}
         </p>
 
-        {/* CTA row — text link + animated arrow circle */}
+        {/* CTA row */}
         <div style={{
           display:        "flex",
           alignItems:     "center",
           justifyContent: "space-between",
-          marginTop:      "4px",
+          marginTop:      "auto",
+          paddingTop:     "8px",
         }}>
           <span style={{
             fontFamily:    "'DM Sans', sans-serif",
             fontSize:      "11px",
-            fontWeight:    700,
+            fontWeight:    800,
             letterSpacing: "0.1em",
             textTransform: "uppercase",
-            color:         hovered ? C.primary : C.muted,
+            color:         hovered ? C.accent : C.primary,
             transition:    "color 0.22s ease",
           }}>
             View Details
           </span>
 
-          {/* Circle arrow button */}
           <div style={{
             width:        "34px",
             height:       "34px",
@@ -316,7 +278,7 @@ function ProductCard({ p, index }) {
               <path
                 d="M2.5 6.5h8M7 3l3.5 3.5L7 10"
                 stroke={hovered ? "#fff" : C.muted}
-                strokeWidth="1.5"
+                strokeWidth="1.8"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
@@ -331,6 +293,27 @@ function ProductCard({ p, index }) {
 
 // ─── Section ──────────────────────────────────────────────────────────────────
 export default function ProductsSection() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProducts() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(4);
+
+      if (!error && data) {
+        setProducts(data as Product[]);
+      }
+      setLoading(false);
+    }
+    
+    fetchProducts();
+  }, []);
+
   return (
     <section style={{ padding: "100px 2rem", background: C.pageBg }}>
       <style>{`
@@ -340,6 +323,9 @@ export default function ProductsSection() {
           from { opacity: 0; transform: translateY(28px); }
           to   { opacity: 1; transform: translateY(0);    }
         }
+        
+        /* Remove GlobalImage default transparent borders that break layouts */
+        .gl-img-wrap { border: none !important; border-bottom: none !important; background: transparent !important; }
 
         .ps-view-all {
           display: inline-flex; align-items: center; gap: 9px;
@@ -373,6 +359,18 @@ export default function ProductsSection() {
           grid-template-columns: repeat(4, 1fr);
           gap: 20px;
         }
+        
+        .ps-skel {
+          background: #F8FAFC; border: 1px solid ${C.border}; border-radius: 16px; height: 480px;
+          animation: pulse 1.5s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+          0% { opacity: 0.6; }
+          50% { opacity: 1; }
+          100% { opacity: 0.6; }
+        }
+
         @media(max-width: 1100px) {
           .ps-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -397,7 +395,7 @@ export default function ProductsSection() {
             <p style={{
               fontFamily:    "'DM Sans', sans-serif",
               fontSize:      "10px",
-              fontWeight:    700,
+              fontWeight:    800,
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color:         C.accent,
@@ -455,9 +453,17 @@ export default function ProductsSection() {
 
         {/* ── 4-card grid ── */}
         <div className="ps-grid">
-          {PRODUCTS.map((p, i) => (
-            <ProductCard key={p.id} p={p} index={i} />
-          ))}
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => <div key={i} className="ps-skel" />)
+          ) : products.length > 0 ? (
+            products.map((p, i) => (
+              <ProductCard key={p.id} p={p} index={i} />
+            ))
+          ) : (
+            <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "60px 0", color: C.muted, fontFamily: "'DM Sans', sans-serif" }}>
+              No products found. Please add products in the admin panel.
+            </div>
+          )}
         </div>
 
         {/* ── Bottom strip ── */}

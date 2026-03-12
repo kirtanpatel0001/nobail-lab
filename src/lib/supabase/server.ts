@@ -25,7 +25,7 @@ export async function getAllPosts(): Promise<PostCard[]> {
   const { data, error } = await supabase
     .from('posts')
     .select(`
-      id, title, slug, excerpt, cover_url,
+      id, title, slug, excerpt, cover_url, thumbnail_url,
       read_time, featured, published_at,
       author:authors ( name, avatar_url ),
       category:categories ( name, slug, color )
@@ -34,14 +34,14 @@ export async function getAllPosts(): Promise<PostCard[]> {
     .order('published_at', { ascending: false })
 
   if (error) { console.error('[Blog] getAllPosts:', error.message); return [] }
-  return (data ?? []) as PostCard[]
+  return (data ?? []) as unknown as PostCard[]
 }
 
 export async function getFeaturedPosts(): Promise<PostCard[]> {
   const { data, error } = await supabase
     .from('posts')
     .select(`
-      id, title, slug, excerpt, cover_url,
+      id, title, slug, excerpt, cover_url, thumbnail_url,
       read_time, featured, published_at,
       author:authors ( name, avatar_url ),
       category:categories ( name, slug, color )
@@ -52,7 +52,7 @@ export async function getFeaturedPosts(): Promise<PostCard[]> {
     .limit(3)
 
   if (error) { console.error('[Blog] getFeaturedPosts:', error.message); return [] }
-  return (data ?? []) as PostCard[]
+  return (data ?? []) as unknown as PostCard[]
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
