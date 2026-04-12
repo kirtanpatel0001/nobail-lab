@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
 
+import { scryptSync } from "crypto";
+
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Store these in your .env.local — NEVER hardcode real creds in production!
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME!;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD!;
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH!;
 const JWT_SECRET = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET!);
 const SESSION_DURATION = "8h"; // Auto-expire after 8 hours
 
@@ -59,7 +61,24 @@ export async function POST(req: NextRequest) {
   // ── Validate credentials ───────────────────────────────────────────────────
   // Constant-time comparison to prevent timing attacks
   const usernameMatch = timingSafeEqual(username, ADMIN_USERNAME);
-  const passwordMatch = timingSafeEqual(password, ADMIN_PASSWORD);
+  let passwordMatch = false;
+
+  if (ADMIN_PASSWORD_HASH && ADMIN_PASSWORD_HASH.includes(":")) {
+    try {
+      const [salt, key] = ADMIN_PASSWORD_HASH.split(":");
+      const keyBuffer = Buffer.from(key, "hex");
+      const derivedKey = scryptSync(password, salt, 64);
+      if (keyBuffer.length === derivedKey.length) {
+         // Built-in crypto.timingSafeEqual requires buffers of same length.
+         // We use the custom one below instead to avoid import clash with custom fn, 
+         // but wait, Node's `crypto` timingSafeEqual requires same length. 
+         // Since I didn't import timingSafeEqual from crypto, I'll use the custom one on the hex strings.
+         passwordMatch = timingSafeEqual(keyBuffer.toString("hex"), derivedKey.toString("hex"));
+      }
+    } catch (err) {
+      console.error("Password verification error:", err);
+    }
+  }
 
   if (!usernameMatch || !passwordMatch) {
     const current = loginAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };

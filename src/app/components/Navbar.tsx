@@ -3,11 +3,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-// ─── Brand colours (from logo) ───────────────────────────────────────────────
+// ─── Brand colours ────────────────────────────────────────────────────────────
 const C = {
-  primary:  "#2C4A5C",   // deep steel-blue (text logo colour)
-  accent:   "#5BA3C4",   // globe light-blue
-  hover:    "#3D6478",   // mid-blue for hover
+  primary:  "#2C4A5C",
+  accent:   "#5BA3C4",
+  hover:    "#3D6478",
   bg:       "#FFFFFF",
   border:   "#DDE6EA",
   muted:    "#6B8A99",
@@ -19,29 +19,26 @@ const NAV_LINKS = [
   {
     label: "Products", href: "/products",
     sub: [
-      { label: "Ophthalmic (Eye Care)",    href: "/products#ophthalmic" },
-      { label: "Dermatologic (Skin Care)", href: "/products#dermatologic" },
-      { label: "General Therapeutics",     href: "/products#therapeutics" },
+      { label: "Ophthalmic (Eye Care)",    href: "/products?category=Ophthalmic" },
+      { label: "Dermatologic (Skin Care)", href: "/products?category=Dermatology" },
+      { label: "General Therapeutics",     href: "/products?category=General Therapeutics" },
       { label: "All Products",             href: "/products" },
     ],
   },
-    { label: "About Us", href: "/about", sub: [] },
-
+  { label: "About Us", href: "/about", sub: [] },
   {
     label: "Company", href: "/about",
     sub: [
-      { label: "Vision & Mission",href: "/vision-mission" },
-       { label: "Blog", href: "/blog", sub: [] },
+      { label: "Vision & Mission", href: "/vision-mission" },
+      { label: "Blog",             href: "/blog" },
     ],
   },
- 
- 
 ];
 
 export default function Navbar() {
   const pathname      = usePathname();
-  const [scrolled, setScrolled]     = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled]         = useState(false);
+  const [drawerOpen, setDrawerOpen]     = useState(false);
   const [openDesktopMenu, setOpenDesktopMenu] = useState<string | null>(null);
   const [openMobileMenu,  setOpenMobileMenu]  = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -69,20 +66,19 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ── Styles ─────────────────────────────────────── */}
       <style>{`
-        /* Desktop nav links */
         .nb-nl { position:relative; display:inline-flex; align-items:center; gap:5px;
           padding:8px 12px; border-radius:6px; font-size:13.5px; font-weight:500;
           color:${C.muted}; text-decoration:none; font-family:var(--font-geist-sans);
           transition:color 0.18s, background 0.18s; white-space:nowrap; cursor:pointer; }
         .nb-nl:hover, .nb-nl.active { color:${C.primary}; background:rgba(44,74,92,0.07); }
         .nb-nl svg { transition:transform 0.2s; }
-        .nb-nl:hover svg { transform:rotate(180deg); }
+        .nb-nl.active::after { content:""; position:absolute; bottom:2px; left:50%;
+          transform:translateX(-50%); width:18px; height:2px; background:${C.accent};
+          border-radius:2px; }
 
-        /* Desktop dropdown */
         .nb-drop { position:absolute; top:calc(100% + 8px); left:50%; transform:translateX(-50%);
-          min-width:210px; background:#fff; border:1px solid ${C.border};
+          min-width:220px; background:#fff; border:1px solid ${C.border};
           border-radius:12px; padding:6px; box-shadow:0 8px 32px rgba(44,74,92,0.13);
           z-index:200; animation:nb-fade-in 0.15s ease; }
         .nb-drop-link { display:flex; align-items:center; gap:8px; padding:9px 14px;
@@ -92,35 +88,22 @@ export default function Navbar() {
         .nb-drop-link::before { content:""; width:5px; height:5px; border-radius:50%;
           background:${C.accent}; flex-shrink:0; }
 
-        /* Dropdown section label */
-        .nb-drop-label { padding:8px 14px 4px; font-size:10.5px; font-weight:600;
-          letter-spacing:0.08em; text-transform:uppercase; color:${C.muted};
-          font-family:var(--font-geist-sans); }
-
-        /* CTA button */
         .nb-cta { padding:9px 20px; border-radius:7px; font-size:13.5px; font-weight:600;
           color:#fff; text-decoration:none; background:${C.primary};
           font-family:var(--font-geist-sans); transition:background 0.18s, transform 0.15s;
           display:inline-block; white-space:nowrap; }
         .nb-cta:hover { background:${C.hover}; transform:translateY(-1px); }
 
-        /* Mobile drawer overlay */
         .nb-overlay { position:fixed; inset:0; background:rgba(26,46,56,0.45);
           z-index:300; backdrop-filter:blur(3px); animation:nb-fade-in 0.2s; }
-
-        /* Drawer panel */
         .nb-drawer { position:fixed; top:0; right:0; height:100vh; width:min(340px,88vw);
           background:#fff; z-index:301; box-shadow:-8px 0 40px rgba(26,46,56,0.18);
           display:flex; flex-direction:column; animation:nb-slide-in 0.28s cubic-bezier(.22,1,.36,1); }
-
-        /* Mobile nav link */
         .nb-m-link { display:flex; align-items:center; justify-content:space-between;
           padding:13px 20px; font-size:15px; font-weight:500; color:${C.text};
           text-decoration:none; font-family:var(--font-geist-sans); border-radius:8px;
           transition:background 0.15s, color 0.15s; cursor:pointer; }
         .nb-m-link:hover, .nb-m-link.active { background:rgba(44,74,92,0.07); color:${C.primary}; }
-
-        /* Mobile sub-link */
         .nb-m-sub { display:flex; align-items:center; gap:8px; padding:10px 20px 10px 32px;
           font-size:13.5px; color:${C.muted}; text-decoration:none;
           font-family:var(--font-geist-sans); border-radius:8px; transition:color 0.15s, background 0.15s; }
@@ -128,19 +111,12 @@ export default function Navbar() {
         .nb-m-sub::before { content:""; width:4px; height:4px; border-radius:50%;
           background:${C.accent}; flex-shrink:0; }
 
-        /* Active indicator bar */
-        .nb-nl.active::after { content:""; position:absolute; bottom:2px; left:50%;
-          transform:translateX(-50%); width:18px; height:2px; background:${C.accent};
-          border-radius:2px; }
-
         @keyframes nb-fade-in  { from{opacity:0} to{opacity:1} }
         @keyframes nb-slide-in { from{transform:translateX(100%)} to{transform:translateX(0)} }
-
         @media(max-width:980px){ .nb-desktop-nav{display:none!important;} .nb-ham{display:flex!important;} }
         @media(min-width:981px){ .nb-ham{display:none!important;} }
       `}</style>
 
-      {/* ── Header ─────────────────────────────────────── */}
       <header style={{
         position:"fixed", top:0, left:0, right:0, zIndex:100,
         background: scrolled ? "rgba(255,255,255,0.97)" : "#fff",
@@ -153,26 +129,17 @@ export default function Navbar() {
           maxWidth:"1340px", margin:"0 auto", padding:"0 2rem",
           height:"70px", display:"flex", alignItems:"center", justifyContent:"space-between",
         }}>
-
-          {/* ── Logo ── */}
+          {/* Logo */}
           <Link href="/" style={{ textDecoration:"none", display:"flex", alignItems:"center", gap:"10px", flexShrink:0 }}>
-            <img
-              src="/LOGO/NOBAIL1.png"
-              alt="Nobil Laboratories icon"
-              style={{ height:"42px", width:"42px", objectFit:"contain" }}
-            />
-            <img
-              src="/LOGO/NOBIL 02.png"
-              alt="Nobil Laboratories"
-              style={{ height:"22px", objectFit:"contain", maxWidth:"220px" }}
-            />
+            <img src="/LOGO/NOBAIL1.png" alt="Nobil Laboratories icon" style={{ height:"42px", width:"42px", objectFit:"contain" }} />
+            <img src="/LOGO/NOBIL 02.png" alt="Nobil Laboratories" style={{ height:"22px", objectFit:"contain", maxWidth:"220px" }} />
           </Link>
 
-          {/* ── Desktop nav ── */}
+          {/* Desktop nav */}
           <div className="nb-desktop-nav" style={{ display:"flex", alignItems:"center", gap:"1px", marginLeft:"auto", marginRight:"16px" }}>
             {NAV_LINKS.map((link) => {
-              const hasSub = link.sub.length > 0;
-              const isOpen = openDesktopMenu === link.label;
+              const hasSub  = link.sub.length > 0;
+              const isOpen  = openDesktopMenu === link.label;
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
 
               return (
@@ -182,13 +149,11 @@ export default function Navbar() {
                   onMouseEnter={() => hasSub && handleMouseEnter(link.label)}
                   onMouseLeave={() => hasSub && handleMouseLeave()}
                 >
-                  <Link
-                    href={link.href}
-                    className={`nb-nl${isActive ? " active" : ""}`}
-                  >
+                  <Link href={link.href} className={`nb-nl${isActive ? " active" : ""}`}>
                     {link.label}
                     {hasSub && (
-                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" style={{ transform: isOpen ? "rotate(180deg)" : "none", transition:"transform 0.2s" }}>
+                      <svg width="11" height="11" viewBox="0 0 12 12" fill="none"
+                        style={{ transform: isOpen ? "rotate(180deg)" : "none", transition:"transform 0.2s" }}>
                         <path d="M2 4L6 8L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     )}
@@ -215,7 +180,7 @@ export default function Navbar() {
             Contact Us →
           </Link>
 
-          {/* ── Hamburger ── */}
+          {/* Hamburger */}
           <button
             className="nb-ham"
             onClick={() => setDrawerOpen(true)}
@@ -229,13 +194,11 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* ── Mobile Drawer ───────────────────────────────── */}
+      {/* Mobile Drawer */}
       {drawerOpen && (
         <>
           <div className="nb-overlay" onClick={() => setDrawerOpen(false)} />
-
           <div className="nb-drawer">
-            {/* Drawer header */}
             <div style={{
               padding:"0 20px", height:"70px", display:"flex", alignItems:"center",
               justifyContent:"space-between", borderBottom:`1px solid ${C.border}`, flexShrink:0,
@@ -251,11 +214,10 @@ export default function Navbar() {
               >✕</button>
             </div>
 
-            {/* Drawer links */}
             <div style={{ flex:1, overflowY:"auto", padding:"12px" }}>
               {NAV_LINKS.map((link) => {
-                const hasSub = link.sub.length > 0;
-                const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+                const hasSub    = link.sub.length > 0;
+                const isActive  = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
                 const mobileOpen = openMobileMenu === link.label;
 
                 return (
@@ -263,10 +225,7 @@ export default function Navbar() {
                     {hasSub ? (
                       <button
                         className={`nb-m-link${isActive ? " active" : ""}`}
-                        style={{
-                          width:"100%", background:mobileOpen ? "rgba(44,74,92,0.06)" : "transparent",
-                          border:"none", color: isActive ? C.primary : C.text,
-                        }}
+                        style={{ width:"100%", background:mobileOpen ? "rgba(44,74,92,0.06)" : "transparent", border:"none", color: isActive ? C.primary : C.text }}
                         onClick={() => setOpenMobileMenu(mobileOpen ? null : link.label)}
                       >
                         <span>{link.label}</span>
@@ -285,8 +244,6 @@ export default function Navbar() {
                         {link.label}
                       </Link>
                     )}
-
-                    {/* Sub links */}
                     {hasSub && mobileOpen && (
                       <div style={{ paddingBottom:"4px" }}>
                         {link.sub.map((s) => (
@@ -300,7 +257,6 @@ export default function Navbar() {
                 );
               })}
 
-              {/* Vision & Mission as standalone mobile link */}
               <Link
                 href="/about#vision"
                 className="nb-m-link"
@@ -312,7 +268,6 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Drawer footer CTA */}
             <div style={{ padding:"16px 20px", borderTop:`1px solid ${C.border}`, flexShrink:0 }}>
               <Link
                 href="/contact"
